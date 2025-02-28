@@ -2,7 +2,21 @@ from pypresence import Presence
 import time
 import requests
 import tkinter as tk
+import customtkinter as ctk
+import os
 
+roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
+if not os.path.exists(roaming_path):
+    os.makedirs(roaming_path)
+
+ini_file_path = os.path.join(roaming_path, 'config.ini')
+
+if not os.path.exists(ini_file_path):
+    with open(ini_file_path, 'w') as ini_file:
+        ini_file.write('[Settings]\n')
+        ini_file.write('uid=\n')
+
+print(roaming_path)
 
 vatsim_api = "https://data.vatsim.net/v3/vatsim-data.json"
 
@@ -49,31 +63,47 @@ def get_data(user_cid):
 client_id = "1344534564244160662"
 RPC = Presence(client_id)
 
-RPC.connect()
 
-root = tk.Tk()
+root = ctk.CTk()
 root.title("VATSIM Discord Rich Presence")
-root.geometry("400x200")
+root.geometry("450x200")
 
-uid_var = tk.IntVar()
+uid_var = tk.StringVar()
 uid = 0
 
 def submit():
   global uid 
-  uid = uid_var.get()
-  update_presence()
+  try:
+    uid = int(uid_var.get())
+    update_presence()
+  except:
+    status_label.configure(text="Invalid CID!")
 
-uid_label = tk.Label(root, text = 'UID', font=('calibre',10, 'bold'))
-uid_entry = tk.Entry(root,textvariable = uid_var, font=('calibre',10,'normal'))
-sub_btn=tk.Button(root,text = 'Submit', command = submit)
+  
 
-uid_label.grid(row=0,column=0)
-uid_entry.grid(row=0,column=1)
+uid_label = ctk.CTkLabel(root, text = 'UID', font=('arial ',10, 'bold'))
 
-sub_btn.grid(row=1,column=1)
+uid_entry = ctk.CTkEntry(root,textvariable = uid_var, font=('arial ',10,'normal'))
+sub_btn= ctk.CTkButton(root,text = 'Submit', command = submit)
 
-status_label = tk.Label(root, text="Waiting for CID...")
-status_label.grid(row=2, column=0)
+uid_label.pack(anchor="center")
+uid_entry.pack(anchor="center")
+
+sub_btn.pack(anchor="center")
+
+status_label = ctk.CTkLabel(root, text="Please open discord")
+status_label.pack(anchor='center')
+
+
+
+def connect_to_discord():
+  try:
+    status_label.configure(text="RPC connected. Waiting for CID...")
+    RPC.connect()
+  except:
+    status_label.configure(text="Please open discord")
+    root.after(5000, connect_to_discord)
+
 
 def update_presence():
   data = get_data(uid)
@@ -95,15 +125,16 @@ def update_presence():
     if data[6]:
       formated_string += f"Hdg: {data[6]}° | "
     if data[5]:
-      formated_string += f"{data[5]} | "
+      formated_string += f"{data[5]}"
       
-    status_label.config(text=formated_string)
+    status_label.configure(text=formated_string)
     RPC.update(pid=1, details=formated_string)
   else:
-    status_label.config(text="ID is offline")
+    status_label.configure(text="ID is offline")
     RPC.clear(1)
     
   root.after(15000, update_presence)
 
+connect_to_discord()
 root.mainloop()
 
