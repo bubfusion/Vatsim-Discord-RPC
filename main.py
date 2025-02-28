@@ -1,9 +1,10 @@
 from pypresence import Presence
-import time
 import requests
 import tkinter as tk
 import customtkinter as ctk
 import os
+import configparser
+
 
 roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
 if not os.path.exists(roaming_path):
@@ -16,7 +17,9 @@ if not os.path.exists(ini_file_path):
         ini_file.write('[Settings]\n')
         ini_file.write('uid=\n')
 
-print(roaming_path)
+config = configparser.ConfigParser()
+config.read(ini_file_path)
+print(config.get("Settings", "uid"))
 
 vatsim_api = "https://data.vatsim.net/v3/vatsim-data.json"
 
