@@ -28,7 +28,7 @@
 - Simply enter your VATSIM CID into the box and click the button! It is that simple
 - VATIM Discord RPC displays your callsign, altitude, arrival aiport, departing airport, heading, flight rule, and aircraft type!
 - Want your CID to autofill when launching? Simply click the make default button!
-
+- Works on all simulators that support VATSIM
 
 
 
