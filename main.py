@@ -6,8 +6,11 @@ import os
 import sys
 import configparser
 from datetime import datetime, timezone
+from update import check_for_update
 
-# pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC  
+# pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
+version = "v1.0"
+check_for_update(version=version)
 
 '''Used for VATSIM.ico file during compiling'''
 def resource_path(relative_path):
