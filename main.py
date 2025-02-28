@@ -3,12 +3,25 @@ import requests
 import tkinter as tk
 import customtkinter as ctk
 import os
+import sys
 import configparser
 from datetime import datetime, timezone
 
+# pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC  
+
+'''Used for VATSIM.ico file during compiling'''
+def resource_path(relative_path):
+    try:
+        # PyInstaller creates a temp folder and stores the path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # Path for config.ini
 roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
+
 # If path does not exist, then creates it
 if not os.path.exists(roaming_path):
     os.makedirs(roaming_path)
@@ -46,7 +59,6 @@ def get_pilot_info(user_cid):
 def get_data(user_cid):
   try:
     pilot = get_pilot_info(user_cid)
-    print(pilot)
     call_sign = pilot.get("callsign")
     altitude = pilot.get("altitude")
     hdg = pilot.get("heading")
@@ -99,6 +111,7 @@ RPC = Presence(client_id)
 root = ctk.CTk()
 root.title("VATSIM Discord Rich Presence")
 root.geometry("450x200")
+root.wm_iconbitmap(resource_path("VATSIM.ico"))
 
 # cid and checkbox values
 cid_var = tk.StringVar()
@@ -176,7 +189,7 @@ def update_presence():
   # Makes sure pilot is online and exists
   if(data!= None):
     formated_string = ""
-    
+
     # Sets depature airport
     if data[1]:
       formated_string += f"{data[1]}"
