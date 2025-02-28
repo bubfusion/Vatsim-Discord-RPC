@@ -34,7 +34,7 @@
 
 
 ## Support
-Need help with app? Feel free to message me on discord, username bubfusion, or on here.
+Need help with app? Feel free to message me on discord, Bubfusion, or on here.
 
 
 
