@@ -1,6 +1,8 @@
 from pypresence import Presence
 import time
 import requests
+import tkinter as tk
+
 
 vatsim_api = "https://data.vatsim.net/v3/vatsim-data.json"
 
@@ -41,15 +43,40 @@ def get_data(user_cid):
       return None
   except:
     return None
+  
       
 
 client_id = "1344534564244160662"
 RPC = Presence(client_id)
 
 RPC.connect()
-id = 1745222
-while True:
-  data = get_data(id)
+
+root = tk.Tk()
+root.title("VATSIM Discord Rich Presence")
+root.geometry("400x200")
+
+uid_var = tk.IntVar()
+uid = 0
+
+def submit():
+  global uid 
+  uid = uid_var.get()
+  update_presence()
+
+uid_label = tk.Label(root, text = 'UID', font=('calibre',10, 'bold'))
+uid_entry = tk.Entry(root,textvariable = uid_var, font=('calibre',10,'normal'))
+sub_btn=tk.Button(root,text = 'Submit', command = submit)
+
+uid_label.grid(row=0,column=0)
+uid_entry.grid(row=0,column=1)
+
+sub_btn.grid(row=1,column=1)
+
+status_label = tk.Label(root, text="Waiting for CID...")
+status_label.grid(row=2, column=0)
+
+def update_presence():
+  data = get_data(uid)
   if(data!= None):
     formated_string = ""
     if data[1]:
@@ -70,9 +97,13 @@ while True:
     if data[5]:
       formated_string += f"{data[5]} | "
       
-    print(data)
+    status_label.config(text=formated_string)
     RPC.update(pid=1, details=formated_string)
-    time.sleep(15)
   else:
+    status_label.config(text="ID is offline")
     RPC.clear(1)
-    time.sleep(60)
+    
+  root.after(15000, update_presence)
+
+root.mainloop()
+
