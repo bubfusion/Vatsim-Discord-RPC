@@ -12,7 +12,7 @@
 <p align="center">
 <img src="https://i.imgur.com/vEl9TDq.png">
 <img src="https://i.imgur.com/RTWHLgH.png"><br>
-<a href="https://github.com/bubfusion/Vatsim-Discord-RPC/releases"><img src="https://img.shields.io/github/downloads/bubfusion/Vatsim-Discord-RPC/latest/total" alt="download"></a>
+<a href="https://github.com/bubfusion/Vatsim-Discord-RPC/releases"><img src="https://img.shields.io/github/downloads/bubfusion/Vatsim-Discord-RPC/latest/total?color=%232483C5" alt="download"></a>
 
 </p>
 
