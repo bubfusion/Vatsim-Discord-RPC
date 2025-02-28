@@ -11,7 +11,7 @@ from CTkMessagebox import CTkMessagebox
 import webbrowser
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
-version = "v1.1"
+version = "v1.0.1"
 up_to_date = check_for_update(version=version)
 
 '''Used for VATSIM.ico file during compiling'''
