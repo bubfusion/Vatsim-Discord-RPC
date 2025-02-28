@@ -7,10 +7,12 @@ import sys
 import configparser
 from datetime import datetime, timezone
 from update import check_for_update
+from CTkMessagebox import CTkMessagebox
+import webbrowser
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
-version = "v1.0"
-check_for_update(version=version)
+version = "v1.1"
+up_to_date = check_for_update(version=version)
 
 '''Used for VATSIM.ico file during compiling'''
 def resource_path(relative_path):
@@ -115,6 +117,12 @@ root = ctk.CTk()
 root.title("VATSIM Discord Rich Presence")
 root.geometry("450x200")
 root.wm_iconbitmap(resource_path("VATSIM.ico"))
+if up_to_date == False:
+  msg = CTkMessagebox(title="Out of date client", message="There is an update available!", 
+                option_1="Close", option_2="Download")
+  print(msg)
+  if msg.get() == "Download":
+    webbrowser.open("https://github.com/bubfusion/Vatsim-Discord-RPC/releases")
 
 # cid and checkbox values
 cid_var = tk.StringVar()
