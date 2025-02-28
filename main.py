@@ -15,17 +15,15 @@ ini_file_path = os.path.join(roaming_path, 'config.ini')
 if not os.path.exists(ini_file_path):
     with open(ini_file_path, 'w') as ini_file:
         ini_file.write('[Settings]\n')
-        ini_file.write('uid=\n')
+        ini_file.write('cid=\n')
 
 config = configparser.ConfigParser()
 config.read(ini_file_path)
-print(config.get("Settings", "uid"))
 
 vatsim_api = "https://data.vatsim.net/v3/vatsim-data.json"
 
 def get_pilot_info(user_cid):
     response = requests.get(vatsim_api)
-    print(response.status_code)
     if response.status_code == 200:
         data = response.json()
         pilots = data.get("pilots", [])
@@ -43,6 +41,7 @@ def get_data(user_cid):
     arrival = flight_plan.get("arrival")
     altitude = pilot.get("altitude")
     hdg = pilot.get("heading")
+    logon_time = pilot.get("logon_time")
 
     flight_rule_letter = flight_plan.get("flight_rules")
     if(flight_rule_letter == 'I'):
@@ -71,26 +70,41 @@ root = ctk.CTk()
 root.title("VATSIM Discord Rich Presence")
 root.geometry("450x200")
 
-uid_var = tk.StringVar()
-uid = 0
+cid_var = tk.StringVar()
+checkbox_var = ctk.BooleanVar(value=False)
+cid = 0
 
 def submit():
-  global uid 
+  global cid 
   try:
-    uid = int(uid_var.get())
+    cid = int(cid_var.get())
+    if checkbox.get():
+      config.set("Settings", "cid", str(cid))
+      with open(ini_file_path, "w") as config_file:
+        config.write(config_file)
+
     update_presence()
   except:
     status_label.configure(text="Invalid CID!")
 
-  
 
-uid_label = ctk.CTkLabel(root, text = 'UID', font=('arial ',10, 'bold'))
+checkbox = ctk.CTkCheckBox(
+    root,
+    text="Make default",
+    variable=checkbox_var,
+    onvalue=True,
+    offvalue=False,
+)
 
-uid_entry = ctk.CTkEntry(root,textvariable = uid_var, font=('arial ',10,'normal'))
+
+cid_label = ctk.CTkLabel(root, text = 'CID', font=('arial ',10, 'bold'))
+
+cid_entry = ctk.CTkEntry(root,textvariable = cid_var, font=('arial ',10,'normal'))
 sub_btn= ctk.CTkButton(root,text = 'Submit', command = submit)
 
-uid_label.pack(anchor="center")
-uid_entry.pack(anchor="center")
+cid_label.pack(anchor="center")
+cid_entry.pack(anchor="center")
+checkbox.pack(pady=20)
 
 sub_btn.pack(anchor="center")
 
@@ -98,18 +112,22 @@ status_label = ctk.CTkLabel(root, text="Please open discord")
 status_label.pack(anchor='center')
 
 
-
 def connect_to_discord():
   try:
     status_label.configure(text="RPC connected. Waiting for CID...")
     RPC.connect()
+    if config.get("Settings", "cid") != "" and config.get("Settings", "cid") != None:
+      global cid
+      cid = int(config.get("Settings", "cid"))
+      cid_entry.insert(0,str(cid))
+      update_presence()
   except:
     status_label.configure(text="Please open discord")
     root.after(5000, connect_to_discord)
 
 
 def update_presence():
-  data = get_data(uid)
+  data = get_data(cid)
   if(data!= None):
     formated_string = ""
     if data[1]:
@@ -137,6 +155,9 @@ def update_presence():
     RPC.clear(1)
     
   root.after(15000, update_presence)
+
+
+
 
 connect_to_discord()
 root.mainloop()
