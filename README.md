@@ -20,8 +20,6 @@
 
 
 ## Download
-<b>KNOWN ISSUE: Windows Defender will sometimes flag the download as a virus. This is because of Program:Win32/Wacapew.C!ml, a system used to help compile the program with PyInstaller. It is a false postive. I am actively trying to fix this. For now, you can either allowed the
-program to run via Windows Defender settings or download the src and run the program from there</b>
  - The download to the latest release can be found <a href="https://github.com/bubfusion/Vatsim-Discord-RPC/releases">here</a>!
 
 
