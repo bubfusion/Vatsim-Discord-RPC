@@ -11,11 +11,13 @@ from CTkMessagebox import CTkMessagebox
 import webbrowser
 import logging
 from logging.handlers import RotatingFileHandler
+import vatsim_api
+import logging_setup
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
 version = "v1.0.2"
 up_to_date = check_for_update(version=version)
-log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
+log = logging_setup.setup_logging()
 
 '''Used for VATSIM.ico file during compiling'''
 def resource_path(relative_path):
@@ -48,94 +50,7 @@ if not os.path.exists(ini_file_path):
 config = configparser.ConfigParser()
 config.read(ini_file_path)
 
-log_file = roaming_path + "\log.log"
-my_handler = RotatingFileHandler(log_file, mode='a', maxBytes=5*1024*1024, 
-                                 backupCount=2, encoding=None, delay=0)
-my_handler.setFormatter(log_formatter)
-my_handler.setLevel(logging.INFO)
 
-log = logging.getLogger('root')
-log.setLevel(logging.INFO)
-
-log.addHandler(my_handler)
-log.addHandler(my_handler)
-
-# API for Vatsim data
-vatsim_api = "https://data.vatsim.net/v3/vatsim-data.json"
-vatsim_user_api = "https://api.vatsim.net/v2/members/"
-
-def valid_cid(user_cid):
-  response = requests.get(vatsim_user_api + str(user_cid))
-  if response.status_code == 200:
-    log.info("Valid CID")
-    return True
-  else:
-    log.warning(f"Invalid CID: {user_cid}")
-    return False
-    
-
-'''Returns pilot data for given CID'''
-def get_pilot_info(user_cid):
-    response = requests.get(vatsim_api)
-    if response.status_code == 200:
-        data = response.json()
-        pilots = data.get("pilots", [])
-        for pilot in pilots:
-            if pilot.get("cid") == user_cid:
-                log.info(f"Pilot info: {pilot}")
-                return pilot
-        log.info("User is offline")
-        return None
-
-
-'''Returns parsed flight data for given CID'''
-def get_data(user_cid):
-  try:
-    pilot = get_pilot_info(user_cid)
-    call_sign = pilot.get("callsign")
-    altitude = pilot.get("altitude")
-    hdg = pilot.get("heading")
-
-    flight_plan = pilot.get("flight_plan", {})
-
-    # Gets data from flight plan if it exists
-    if flight_plan != None:
-      departure = flight_plan.get("departure")
-      arrival = flight_plan.get("arrival")
-      flight_rule_letter = flight_plan.get("flight_rules")
-
-      if(flight_rule_letter == 'I'):
-        flight_rule = "IFR"
-      elif(flight_rule_letter == 'V'):
-        flight_rule= "VFR"
-      else:
-        flight_rule = None
-
-      aircraft_type = flight_plan.get("aircraft_short")
-    # If no flight plan is filed, sets everything to None
-    else:
-      departure = arrival = flight_rule = aircraft_type = None
-      
-    # How long user has been logged into network for
-    logon_time = (pilot.get("logon_time"))
-
-    # Thank you ChatGPT for this line. Line saver
-    dt = datetime.fromisoformat(logon_time.rstrip('Z')).replace(tzinfo=timezone.utc)
-
-    # Get epoch time
-    epoch_time = int(dt.timestamp())
-
-    # If sucessfully found user on network, return parsed data
-    if(pilot != None):
-      return(call_sign, departure, arrival, altitude, flight_rule, aircraft_type, hdg, epoch_time)
-    # If no user was found return None
-    else:
-      return None
-  except Exception as e:
-    log.error(e)
-    return None
-  
-      
 
 # Discord dev client id
 client_id = "1344534564244160662"
@@ -227,12 +142,12 @@ def connect_to_discord():
 def update_presence():
 
   # If user is invalid
-  if (valid_cid(cid) == False):
+  if (vatsim_api.valid_cid(cid) == False):
     status_label.configure(text=f"CID: {cid} is invalid")
     RPC.clear(1)
 
   else:
-    data = get_data(cid)
+    data = vatsim_api.get_data(cid)
 
     # If user is offline
     if (data == None):

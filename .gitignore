@@ -31,3 +31,5 @@ build/main/localpycs/pyimod04_pywin32.pyc
 build/main/localpycs/struct.pyc
 Vatsim-Discord-RPC.spec
 main.spec
+__pycache__/logging_setup.cpython-311.pyc
+__pycache__/vatsim_api.cpython-311.pyc
