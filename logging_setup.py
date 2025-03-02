@@ -1,17 +1,6 @@
-from pypresence import Presence
-import requests
-import tkinter as tk
-import customtkinter as ctk
 import os
-import sys
-import configparser
-from datetime import datetime, timezone
-from update import check_for_update
-from CTkMessagebox import CTkMessagebox
-import webbrowser
 import logging
 from logging.handlers import RotatingFileHandler
-import vatsim_api
 
 log = None
 roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
