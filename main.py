@@ -1,56 +1,19 @@
 from pypresence import Presence
-import requests
 import tkinter as tk
 import customtkinter as ctk
-import os
-import sys
-import configparser
-from datetime import datetime, timezone
 from update import check_for_update
 from CTkMessagebox import CTkMessagebox
 import webbrowser
-import logging
-from logging.handlers import RotatingFileHandler
 import vatsim_api
 import logging_setup
+import config_setup
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
 version = "v1.0.2"
 up_to_date = check_for_update(version=version)
 log = logging_setup.setup_logging()
 
-'''Used for VATSIM.ico file during compiling'''
-def resource_path(relative_path):
-    try:
-        # PyInstaller creates a temp folder and stores the path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
-# Path for config.ini
-roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
-
-# If path does not exist, then creates it
-if not os.path.exists(roaming_path):
-    os.makedirs(roaming_path)
-
-# Stores path for config file
-ini_file_path = os.path.join(roaming_path, 'config.ini')
-
-
-# If the config file does not exist, creates it with needed info
-if not os.path.exists(ini_file_path):
-    with open(ini_file_path, 'w') as ini_file:
-        ini_file.write('[Settings]\n')
-        ini_file.write('cid=\n')
-
-# Config parser for reading and writing
-config = configparser.ConfigParser()
-config.read(ini_file_path)
-
-
+config, ini_file_path = config_setup.get_config()
 
 # Discord dev client id
 client_id = "1344534564244160662"
@@ -60,7 +23,7 @@ RPC = Presence(client_id)
 root = ctk.CTk()
 root.title("VATSIM Discord Rich Presence")
 root.geometry("450x200")
-root.wm_iconbitmap(resource_path("VATSIM.ico"))
+root.wm_iconbitmap(config_setup.resource_path("VATSIM.ico"))
 if up_to_date == False:
   msg = CTkMessagebox(title="Out of date client", message="There is an update available!", 
                 option_1="Close", option_2="Download")
@@ -73,9 +36,9 @@ cid_var = tk.StringVar()
 checkbox_var = ctk.BooleanVar(value=False)
 cid = 0
 
-'''Runs after clicking submit. Obtains and updates RPC data and .ini if needed'''
 def submit():
-  global cid 
+  '''Runs after clicking submit. Obtains and updates RPC data and .ini if needed'''
+  global cid
   try:
     cid = int(cid_var.get())
     if checkbox.get():
