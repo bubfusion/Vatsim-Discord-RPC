@@ -9,10 +9,13 @@ from datetime import datetime, timezone
 from update import check_for_update
 from CTkMessagebox import CTkMessagebox
 import webbrowser
+import logging
+from logging.handlers import RotatingFileHandler
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
-version = "v1.0.1"
+version = "v1.0.2"
 up_to_date = check_for_update(version=version)
+log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
 
 '''Used for VATSIM.ico file during compiling'''
 def resource_path(relative_path):
@@ -45,8 +48,31 @@ if not os.path.exists(ini_file_path):
 config = configparser.ConfigParser()
 config.read(ini_file_path)
 
+log_file = roaming_path + "\log.log"
+my_handler = RotatingFileHandler(log_file, mode='a', maxBytes=5*1024*1024, 
+                                 backupCount=2, encoding=None, delay=0)
+my_handler.setFormatter(log_formatter)
+my_handler.setLevel(logging.INFO)
+
+log = logging.getLogger('root')
+log.setLevel(logging.INFO)
+
+log.addHandler(my_handler)
+log.addHandler(my_handler)
+
 # API for Vatsim data
 vatsim_api = "https://data.vatsim.net/v3/vatsim-data.json"
+vatsim_user_api = "https://api.vatsim.net/v2/members/"
+
+def valid_cid(user_cid):
+  response = requests.get(vatsim_user_api + str(user_cid))
+  if response.status_code == 200:
+    log.info("Valid CID")
+    return True
+  else:
+    log.warning(f"Invalid CID: {user_cid}")
+    return False
+    
 
 '''Returns pilot data for given CID'''
 def get_pilot_info(user_cid):
@@ -56,7 +82,9 @@ def get_pilot_info(user_cid):
         pilots = data.get("pilots", [])
         for pilot in pilots:
             if pilot.get("cid") == user_cid:
+                log.info(f"Pilot info: {pilot}")
                 return pilot
+        log.info("User is offline")
         return None
 
 
@@ -103,7 +131,8 @@ def get_data(user_cid):
     # If no user was found return None
     else:
       return None
-  except:
+  except Exception as e:
+    log.error(e)
     return None
   
       
@@ -185,8 +214,10 @@ def connect_to_discord():
       cid_entry.insert(0,str(cid))
       # Updates based on default cid if it is entered
       update_presence()
+      log.info("Default CID found and discord updated")
   # Runs if RPC wrapper can't make connection with discord
-  except:
+  except Exception as e:
+    log.warning(e)
     status_label.configure(text="Please open discord")
     # Checks connection again after 5 seconds
     root.after(5000, connect_to_discord)
@@ -194,48 +225,53 @@ def connect_to_discord():
 
 '''Updates UI and discord RPC to display flight details'''
 def update_presence():
-  # Gets data for current cid
-  data = get_data(cid)
 
-  # Makes sure pilot is online and exists
-  if(data!= None):
-    formated_string = ""
-
-    # Sets depature airport
-    if data[1]:
-      formated_string += f"{data[1]}"
-    # Sets arrival airport
-    if data[2]:
-      formated_string += f"➜{data[2]} | "
-    # If no arrival airport, but has depature
-    elif data[1]:
-      formated_string += f" | "
-    # Sets callsign
-    if data[0]:
-      formated_string += f"Callsign: {data[0]} | "
-    # Sets flight rules
-    if data[4]:
-      formated_string += f"{data[4]} | "
-    # Sets altitude
-    if data[3]:
-      formated_string += f"Alt: {data[3]}ft | "
-    # Sets heading
-    if data[6]:
-      formated_string += f"Hdg: {data[6]}° | "
-    # Sets aircraft type
-    if data[5]:
-      formated_string += f"{data[5]}"
-
-    
-    # Updates UI to display what is displayed on discord
-    status_label.configure(text=formated_string)
-    RPC.update(pid=1, details=formated_string, start=data[7])
-  # If there is no pilot data, means CID is wrong or user is offline
-  else:
-    status_label.configure(text="User is offline or invalid")
-
-    # Clears RPC
+  # If user is invalid
+  if (valid_cid(cid) == False):
+    status_label.configure(text=f"CID: {cid} is invalid")
     RPC.clear(1)
+
+  else:
+    data = get_data(cid)
+
+    # If user is offline
+    if (data == None):
+      status_label.configure(text=f"{cid} is offline")
+      # Clears message
+      RPC.clear(1)
+    else:
+      
+      formated_string = ""
+
+      # Sets depature airport
+      if data[1]:
+        formated_string += f"{data[1]}"
+      # Sets arrival airport
+      if data[2]:
+        formated_string += f"➜{data[2]} | "
+      # If no arrival airport, but has depature
+      elif data[1]:
+        formated_string += f" | "
+      # Sets callsign
+      if data[0]:
+        formated_string += f"Callsign: {data[0]} | "
+      # Sets flight rules
+      if data[4]:
+        formated_string += f"{data[4]} | "
+      # Sets altitude
+      if data[3]:
+        formated_string += f"Alt: {data[3]}ft | "
+      # Sets heading
+      if data[6]:
+        formated_string += f"Hdg: {data[6]}° | "
+      # Sets aircraft type
+      if data[5]:
+        formated_string += f"{data[5]}"
+
+      
+      # Updates UI to display what is displayed on discord
+      status_label.configure(text=formated_string)
+      RPC.update(pid=1, details=formated_string, start=data[7])
   
   # Reupdates every 15 seconds
   root.after(15000, update_presence)
