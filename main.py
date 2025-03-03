@@ -119,37 +119,11 @@ def update_presence():
       RPC.clear(1)
     else:
       
-      formated_string = ""
-
-      # Sets depature airport
-      if data[1]:
-        formated_string += f"{data[1]}"
-      # Sets arrival airport
-      if data[2]:
-        formated_string += f"➜{data[2]} | "
-      # If no arrival airport, but has depature
-      elif data[1]:
-        formated_string += f" | "
-      # Sets callsign
-      if data[0]:
-        formated_string += f"Callsign: {data[0]} | "
-      # Sets flight rules
-      if data[4]:
-        formated_string += f"{data[4]} | "
-      # Sets altitude
-      if data[3]:
-        formated_string += f"Alt: {data[3]}ft | "
-      # Sets heading
-      if data[6]:
-        formated_string += f"Hdg: {data[6]}° | "
-      # Sets aircraft type
-      if data[5]:
-        formated_string += f"{data[5]}"
-
+      formated_string, start_time = vatsim_api.format_pilot(data)
       
       # Updates UI to display what is displayed on discord
       status_label.configure(text=formated_string)
-      RPC.update(pid=1, details=formated_string, start=data[7])
+      RPC.update(pid=1, details=formated_string, start=start_time)
   
   # Reupdates every 15 seconds
   root.after(15000, update_presence)

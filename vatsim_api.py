@@ -24,10 +24,16 @@ def get_pilot_info(user_cid):
     if response.status_code == 200:
         data = response.json()
         pilots = data.get("pilots", [])
+        controllers = data.get("controllers", [])
         for pilot in pilots:
             if pilot.get("cid") == user_cid:
                 log.info(f"Pilot info: {pilot}")
                 return pilot
+        for controller in controllers:
+          if controller.get("cid") == user_cid:
+            print(f"Controller info: {controller}")
+            log.info(f"Controller info: {controller}")
+            return controller
         log.info("User is offline")
         return None
 
@@ -78,3 +84,33 @@ def get_data(user_cid):
   except Exception as e:
     log.error(e)
     return None
+  
+def format_pilot(data):
+  formated_string = ""
+  # Sets depature airport
+  if data[1]:
+    formated_string += f"{data[1]}"
+  # Sets arrival airport
+  if data[2]:
+    formated_string += f"➜{data[2]} | "
+  # If no arrival airport, but has depature
+  elif data[1]:
+    formated_string += f" | "
+  # Sets callsign
+  if data[0]:
+    formated_string += f"Callsign: {data[0]} | "
+  # Sets flight rules
+  if data[4]:
+    formated_string += f"{data[4]} | "
+  # Sets altitude
+  if data[3]:
+    formated_string += f"Alt: {data[3]}ft | "
+  # Sets heading
+  if data[6]:
+    formated_string += f"Hdg: {data[6]}° | "
+  # Sets aircraft type
+  if data[5]:
+    formated_string += f"{data[5]}"
+
+  print(formated_string)
+  return (formated_string, data[7])
