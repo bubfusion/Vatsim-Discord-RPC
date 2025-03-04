@@ -31,7 +31,6 @@ def get_user_info(user_cid):
                 return (pilot, 0)
         for controller in controllers:
           if controller.get("cid") == user_cid:
-            print(f"Controller info: {controller}")
             log.info(f"Controller info: {controller}")
             return (controller,1)
         log.info("User is offline")
@@ -41,7 +40,6 @@ def get_user_info(user_cid):
 '''Returns parsed flight data for given CID'''
 def get_data(user_cid):
   data = get_user_info(user_cid)
-  print(data)
   try:
     if data[1] == 0:
       
@@ -103,35 +101,12 @@ def get_data(user_cid):
 
         rating_string = ""
 
-        match rating:
-          case -1:
-            rating_string = "INA"
-          case 0:
-            rating_string = "SUS"
-          case 1:
-            rating_string = "OBS"
-          case 2:
-            rating_string = "S1"
-          case 3:
-            rating_string = "S2"
-          case 4:
-            rating_string = "S4"
-          case 5:
-            rating_string = "C1"
-          case 6:
-            rating_string = "C2"
-          case 7:
-            rating_string = "C3"
-          case 8:
-            rating_string = "I1"
-          case 9:
-            rating_string = "I2"
-          case 10:
-            rating_string = "I3"
-          case 11:
-            rating_string = "SUP"
-          case 12:
-            rating_string = "ADM"
+        response = requests.get(vatsim_api)
+        api_data = response.json()
+        for r in api_data.get('ratings', []):
+          print(r)
+          if rating == r.get('id'):
+            rating_string = r["short"]
 
         # If sucessfully found user on network, return parsed data
         if(controller != None):
