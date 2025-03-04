@@ -10,7 +10,7 @@ import config_setup
 from pypresence.exceptions import PipeClosed
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
-version = "v1.0.2"
+version = "v1.1.0"
 up_to_date = check_for_update(version=version)
 log = logging_setup.setup_logging()
 
