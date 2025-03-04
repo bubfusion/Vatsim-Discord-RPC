@@ -7,6 +7,7 @@ import webbrowser
 import vatsim_api
 import logging_setup
 import config_setup
+from pypresence.exceptions import PipeClosed
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
 version = "v1.0.2"
@@ -80,6 +81,7 @@ status_label = ctk.CTkLabel(root, text="Please open discord")
 status_label.pack(anchor='center')
 
 
+
 def connect_to_discord():
   # Trys to connect to discord, and catches it if fails (such as discord not being opened)
   try:
@@ -107,7 +109,10 @@ def update_presence():
   # If user is invalid
   if (vatsim_api.valid_cid(cid) == False):
     status_label.configure(text=f"CID: {cid} is invalid")
-    RPC.clear(1)
+    try:
+      RPC.clear(1)
+    except PipeClosed:
+      root.destroy()
 
   else:
     data = vatsim_api.get_data(cid)
@@ -116,7 +121,10 @@ def update_presence():
     if (data == None):
       status_label.configure(text=f"{cid} is offline")
       # Clears message
-      RPC.clear(1)
+      try:
+        RPC.clear(1)
+      except PipeClosed:
+        root.destroy()
     else:
       if data[0] == 0:
         formated_string, start_time = vatsim_api.format_pilot(data)
@@ -125,7 +133,11 @@ def update_presence():
       
       # Updates UI to display what is displayed on discord
       status_label.configure(text=formated_string)
-      RPC.update(pid=1, details=formated_string, start=start_time)
+      try:
+        RPC.update(pid=1, details=formated_string, start=start_time)
+      except PipeClosed:
+        root.destroy()
+
   
   # Reupdates every 15 seconds
   root.after(15000, update_presence)
@@ -134,4 +146,5 @@ def update_presence():
 connect_to_discord()
 # Main loop for UI
 root.mainloop()
+
 
