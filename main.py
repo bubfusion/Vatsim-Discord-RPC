@@ -118,8 +118,10 @@ def update_presence():
       # Clears message
       RPC.clear(1)
     else:
-      
-      formated_string, start_time = vatsim_api.format_pilot(data)
+      if data[0] == 0:
+        formated_string, start_time = vatsim_api.format_pilot(data)
+      else:
+        formated_string, start_time = vatsim_api.fortmat_controller(data)
       
       # Updates UI to display what is displayed on discord
       status_label.configure(text=formated_string)
