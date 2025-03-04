@@ -104,7 +104,6 @@ def get_data(user_cid):
         response = requests.get(vatsim_api)
         api_data = response.json()
         for r in api_data.get('ratings', []):
-          print(r)
           if rating == r.get('id'):
             rating_string = r["short"]
 
