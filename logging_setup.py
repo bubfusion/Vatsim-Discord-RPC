@@ -7,6 +7,9 @@ roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
 log_file = roaming_path + "\log.log"
 
 def setup_logging():
+    if not os.path.exists(roaming_path):
+        os.makedirs(roaming_path)
+
     log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
 
     my_handler = RotatingFileHandler(log_file, mode='a', maxBytes=5*1024*1024, 

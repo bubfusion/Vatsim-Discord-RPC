@@ -10,11 +10,14 @@ import config_setup
 from pypresence.exceptions import PipeClosed
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
-version = "v1.1.0"
+version = "v1.1.1"
 up_to_date = check_for_update(version=version)
-log = logging_setup.setup_logging()
+
 
 config, ini_file_path = config_setup.get_config()
+
+log = logging_setup.setup_logging()
+
 
 # Discord dev client id
 client_id = "1344534564244160662"
