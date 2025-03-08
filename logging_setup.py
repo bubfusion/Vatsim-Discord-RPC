@@ -1,10 +1,15 @@
 import os
 import logging
+import sys
 from logging.handlers import RotatingFileHandler
 
 log = None
-roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
-log_file = roaming_path + "\log.log"
+if sys.platform == "darwin":
+    roaming_path = os.path.join(os.path.expanduser("~"), "Library", "Application Support", "VATSIM-Discord-RPC")
+else:
+    roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
+    
+log_file =  roaming_path + "/log.log"
 
 def setup_logging():
     if not os.path.exists(roaming_path):

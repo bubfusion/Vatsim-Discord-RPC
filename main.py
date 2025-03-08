@@ -8,6 +8,7 @@ import vatsim_api
 import logging_setup
 import config_setup
 from pypresence.exceptions import PipeClosed
+import sys
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
 version = "v1.1.1"
@@ -27,7 +28,10 @@ RPC = Presence(client_id)
 root = ctk.CTk()
 root.title("VATSIM Discord Rich Presence")
 root.geometry("450x200")
-root.wm_iconbitmap(config_setup.resource_path("VATSIM.ico"))
+if sys.platform == "darwin":
+  root.wm_iconbitmap(config_setup.resource_path("VATSIM.icns"))
+else:
+  root.wm_iconbitmap(config_setup.resource_path("VATSIM.ico"))
 if up_to_date == False:
   msg = CTkMessagebox(title="Out of date client", message="There is an update available!", 
                 option_1="Close", option_2="Download")

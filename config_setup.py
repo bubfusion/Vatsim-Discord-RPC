@@ -15,7 +15,10 @@ def resource_path(relative_path):
 
 def get_config():
     # Path for config.ini
-    roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
+    if sys.platform == "darwin":
+        roaming_path = os.path.join(os.path.expanduser("~"), "Library", "Application Support", "VATSIM-Discord-RPC")
+    else:
+        roaming_path = os.path.join(os.getenv('APPDATA'), "VATSIM-Discord-RPC")
 
     # If path does not exist, then creates it
     if not os.path.exists(roaming_path):
