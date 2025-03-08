@@ -11,6 +11,7 @@ from pypresence.exceptions import PipeClosed
 import sys
 
 # pyinstaller main.py --onefile --icon=VATSIM.ico --add-data "VATSIM.ico;." -w -n Vatsim-Discord-RPC
+# pyinstaller main.py --onefile --icon=VATSIM.icns --add-data=VATSIM.icns:./ -w -n Vatsim-Discord-RPC --osx-bundle-identifier=com.example.vatsimrpc
 version = "v1.1.1"
 up_to_date = check_for_update(version=version)
 
